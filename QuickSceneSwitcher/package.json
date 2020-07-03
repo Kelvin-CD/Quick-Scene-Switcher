@@ -1,0 +1,19 @@
+{
+  "name": "com.kelvip.quick-scene-switcher",
+  "version": "1.0.0",
+  "displayName": "Quick Scene Switcher",
+  "description": "A unity tool for quick access to switch between scenes.",
+  "unity": "2019.1",
+  "keywords": [
+    "scene",
+    "scenes",
+    "utility",
+    "window"
+  ],
+  "author": {
+    "name": "Kelvip",
+    "email": "kelvin@firsttrystudios.com",
+    "url": "https://twitter.com/Kelvin_CD"
+  },
+  "type": "tool"
+}
