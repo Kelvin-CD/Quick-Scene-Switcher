@@ -1,6 +1,6 @@
 # QuickSceneSwitcher for Unity
 A unity tool for quick access to switch between scenes.
-![](gifName.gif)
+![](Demo.gif)
 
 # Installation
 
@@ -15,5 +15,8 @@ A unity tool for quick access to switch between scenes.
 - To open the tool, click on the window tab and then **Quick Scene Switcher**.
 - To add scenes you have to enter **EditMode**.
 - Then just click on Add Scene, and drag and drop the scene on to the slot.
-- You can also pick the color of each button using the color pickers on the right.
+
+![](AddScene.png)
+
+- Choose the **color** of each button by using the color pickers on the right.
 - That's it, have fun!
