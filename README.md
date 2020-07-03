@@ -20,4 +20,7 @@ A Unity tool for quickly switching between scenes without having to go through f
   ![](AddScene.png)
 
 - You can choose the **color** of each button by using the color pickers on the right.
+
+  ![](SceneSwitcher.png)
+
 - That's it, have fun!
