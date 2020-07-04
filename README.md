@@ -1,4 +1,4 @@
-# QuickSceneSwitcher for Unity
+# Quick Scene Switcher for Unity
 
 A Unity tool for quickly switching between scenes without having to go through folders.
 
