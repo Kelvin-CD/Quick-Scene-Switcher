@@ -1,4 +1,5 @@
 # QuickSceneSwitcher for Unity
+
 A Unity tool for quickly switching between scenes without having to go through folders.
 
 ![](Demo.gif)
@@ -10,6 +11,17 @@ A Unity tool for quickly switching between scenes without having to go through f
   3. Paste **this URL**: https://github.com/Kelvin-CD/Quick-Scene-Switcher.git#upm
   4. Wait for unity to install the package
   5. Done!
+
+### Manual Install
+If your unity version doesn't have the option to **Add package from git URL** you can still add the package dependence manually:
+
+  1. Go to *YourProject/Packages* and open ***manifest.json***
+  2. Add this dependency:
+  
+    "com.kelvip.quick-scene-switcher": "https://github.com/Kelvin-CD/Quick-Scene-Switcher.git#upm",
+    
+  3. Save the file, go back into unity and wait for it to install the package
+  4. Done!
 
 # Usage
 
