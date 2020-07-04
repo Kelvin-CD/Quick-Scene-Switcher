@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "displayName": "Quick Scene Switcher",
   "description": "A unity tool for quick access to switch between scenes.",
-  "unity": "2019.1",
+  "unity": "2018.1",
   "keywords": [
     "scene",
     "scenes",
