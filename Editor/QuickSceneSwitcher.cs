@@ -13,16 +13,15 @@ public class QuickSceneSwitcher : EditorWindow
     private Vector2 scrollPosition = Vector2.zero;
     private GUILayoutOption heightLayout;
     private Color darkGray;
-    private Color footerColor;
 
     // Prefix used to store preferences
-    // Format is: SCENE_SWITCHER/DefaultCompany/ProjectName/
+    // Format is: QuickSceneSwitcher/DefaultCompany/ProjectName/
     private string PREFS_PREFIX;
 
     // Initialization
     void OnEnable()
     {
-        PREFS_PREFIX = $"QUICK_SCENE_SWITCHER/{Application.companyName}/{Application.productName}/";
+        PREFS_PREFIX = $"QuickSceneSwitcher/{Application.companyName}/{Application.productName}/";
 
         scenes = new List<SceneAsset>();
         buttonColors = new List<Color>();
@@ -31,7 +30,6 @@ public class QuickSceneSwitcher : EditorWindow
         // Style vars
         heightLayout = GUILayout.Height(22);
         darkGray = new Color(0.28f, 0.28f, 0.28f);
-        footerColor = new Color(0, 0, 0, 0.25f);
 
         // Load preferences and scenes when this window is opened
         LoadPrefs();
@@ -56,22 +54,22 @@ public class QuickSceneSwitcher : EditorWindow
         labelStyle.fixedHeight = 22;
         labelStyle.fontSize = 14;
 
-        Color previousColor = GUI.contentColor;
+        Color originalContentColor = GUI.contentColor;
 
         // Scrollbar handling
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-        // Label and 'EditMode' Button
+        // Label 'Quick Scenes'
         GUILayout.Space(5);
         GUILayout.BeginHorizontal();
         GUILayout.Label(" Quick Scenes", labelStyle);
         GUILayout.FlexibleSpace();
 
-        GUI.backgroundColor = editMode ? Color.white * 1.4f : darkGray;
+        // Toggle 'EditMode' Button
+        GUI.backgroundColor = editMode ? GetButtonColorBasedOnEditorTheme(Color.white) : darkGray;
         UpdateButtonStyleTextColor(GUI.backgroundColor, buttonStyleBold);
-
-        editMode = GUILayout.Toggle(editMode, editMode? " Exit Edit Mode " : " Edit Mode ", buttonStyleBold);
-        GUI.backgroundColor = previousColor;
+        editMode = GUILayout.Toggle(editMode, editMode ? " Exit Edit Mode " : " Edit Mode ", buttonStyleBold);
+        GUI.backgroundColor = originalContentColor;
 
         GUILayout.EndHorizontal();
         GUILayout.Space(3);
@@ -112,14 +110,14 @@ public class QuickSceneSwitcher : EditorWindow
                 if (isCurrentScene) EditorGUI.BeginDisabledGroup(true);
 
                 // Setup button background and text colors
-                GUI.backgroundColor = buttonColors[i];
-                UpdateButtonStyleTextColor(buttonColors[i], buttonStyleBold);
+                GUI.backgroundColor = GetButtonColorBasedOnEditorTheme(buttonColors[i]);
+                UpdateButtonStyleTextColor(GUI.backgroundColor, buttonStyleBold);
 
                 // Draw scene button
                 if (scenes[i] != null && GUILayout.Button($"{scenes[i].name}{(isCurrentScene ? " (current)" : "")}", buttonStyleBold))
                     OpenScene(scenes[i]);
 
-                GUI.backgroundColor = previousColor;
+                GUI.backgroundColor = originalContentColor;
                 EditorGUI.EndDisabledGroup();
             }
         }
@@ -127,6 +125,8 @@ public class QuickSceneSwitcher : EditorWindow
         if (editMode) // 'EditMode' bottom options
         {
             GUILayout.Space(5);
+
+            // 'Add Scene' Button style
             GUI.backgroundColor = darkGray;
             UpdateButtonStyleTextColor(GUI.backgroundColor, buttonStyleBold);
             float previousHeight = buttonStyleBold.fixedHeight;
@@ -137,8 +137,9 @@ public class QuickSceneSwitcher : EditorWindow
 
             GUILayout.Space(1);
 
+            // 'Load From BuildSettings' Button style
             buttonStyleBold.fixedHeight = previousHeight;
-            GUI.backgroundColor = previousColor;
+            GUI.backgroundColor = GetButtonColorBasedOnEditorTheme(originalContentColor);
             UpdateButtonStyleTextColor(GUI.backgroundColor, buttonStyleBold);
 
             if (GUILayout.Button("Load From BuildSettings", buttonStyleBold))
@@ -158,17 +159,53 @@ public class QuickSceneSwitcher : EditorWindow
         }
 
         // Draw Footer
-        GUILayout.FlexibleSpace();
-        GUIStyle footerStyle = EditorStyles.centeredGreyMiniLabel;
-        footerStyle.normal.textColor = footerColor;
-        GUILayout.Label("Made by Kelvip", footerStyle);
-        GUILayout.Space(5);
+        if (editMode)
+        {
+            GUILayout.FlexibleSpace();
+            GUIStyle footerStyle = EditorStyles.centeredGreyMiniLabel;
+            Color footerColor = (EditorGUIUtility.isProSkin ? Color.white : Color.black);
+            footerColor.a = 0.25f;
+            footerStyle.normal.textColor = footerColor;
+            GUILayout.Label("Made by Kelvip", footerStyle);
+            GUILayout.Space(5);
+        }
 
         GUILayout.EndScrollView();
 
         // If any preferences have changed, save them to persistent data
-        if(GUI.changed) SavePrefs();
+        if (GUI.changed) SavePrefs();
     }
+
+    #region AuxiliarFunctions
+
+    // This function chooses black or white for the scene button texts based on the color of the button
+    private void UpdateButtonStyleTextColor(Color color, GUIStyle style)
+    {
+        Color.RGBToHSV(color, out float h, out float s, out float v);
+        bool whiteText = (v < 0.7f || (s > 0.4f && (h < 0.1f || h > 0.55f)));
+        Color textColor = whiteText ? Color.white : Color.black;
+        Color hoverTextColor = textColor + (whiteText ? Color.black * -0.2f : Color.white * 0.2f);
+
+        style.normal.textColor = textColor;
+        style.hover.textColor = hoverTextColor;
+        style.focused.textColor = textColor;
+        style.active.textColor = textColor;
+
+        style.onNormal.textColor = textColor;
+        style.onHover.textColor = hoverTextColor;
+        style.onFocused.textColor = textColor;
+        style.onActive.textColor = textColor;
+    }
+
+    // Returns the buttonColor compensating for the editor theme skin
+    private Color GetButtonColorBasedOnEditorTheme(Color buttonColor)
+    {
+        // If isProSkin is true, the editor is in dark mode
+        Color editorColor = EditorGUIUtility.isProSkin ? (Color.white * 0.3f) : Color.black;
+        return buttonColor * (EditorGUIUtility.isProSkin ? 2f : 1f) + editorColor;
+    }
+
+    #endregion
 
     #region SceneManagement
 
@@ -179,9 +216,12 @@ public class QuickSceneSwitcher : EditorWindow
 
         // Check if there are unsaved changes in the current scene and
         // ask if the user wants to save them before switching to the new scene
-        EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-        EditorSceneManager.OpenScene(scenePath);
-        SavePrefs();
+        // If the user chooses 'cancel', don't switch scenes
+        if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+        {
+            EditorSceneManager.OpenScene(scenePath);
+            SavePrefs();
+        }
     }
 
     // Add another scene slot
@@ -246,20 +286,6 @@ public class QuickSceneSwitcher : EditorWindow
     }
 
     #endregion
-
-    // This function chooses black or white for the scene button texts based on the color of the button
-    private void UpdateButtonStyleTextColor(Color color, GUIStyle style)
-    {
-        Color.RGBToHSV(color, out float h, out float s, out float v);
-        bool whiteText = (v < 0.7f || (s > 0.4f && (h < 0.1f || h > 0.55f)));
-        Color textColor = whiteText ? Color.white : Color.black;
-        Color hoverTextColor = textColor + (whiteText ? Color.black * -0.2f : Color.white * 0.2f);
-
-        style.normal.textColor = textColor;
-        style.hover.textColor = hoverTextColor;
-        style.focused.textColor = textColor;
-        style.active.textColor = textColor;
-    }
 
     #region PersistentData
 
